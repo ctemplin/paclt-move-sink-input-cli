@@ -14,35 +14,42 @@ const inputRg = new RegExp(/Sink Input #(\d+).*Sink: (\d+).*media\.name = "(\w*)
 const sinkArr = Array.from(sinks.matchAll(sinksRg))
 const inputArr = Array.from(inputs.matchAll(inputRg))
 
-// Assuming 1 active input
-// TODO: handle 0 and 2+ inputs
-const defInput = inputArr[0]
+//
+if (inputArr.length == 0) {
+    shell.echo("No active input found. Exiting...")
+    setTimeout(_ => shell.exit(), 2000)
+} else {
 
-// Find the sink for the chosen input
-const curSink = sinkArr.find((i) => i[1] == defInput[2])
-// Output info about active input/sink.
-shell.echo(util.format('%s - %s - playing on %s', defInput[4], defInput[3], curSink[3]))
+    // Assuming 1 active input
+    // TODO: handle 0 and 2+ inputs
+    const defInput = inputArr[0]
 
-// List/number the non-active sinks
-sinkArr.forEach((i, index) => { if (i[1] != curSink[1]) shell.echo(util.format('%s - %s', index, i[3])) })
+    // Find the sink for the chosen input
+    const curSink = sinkArr.find((i) => i[1] == defInput[2])
+    // Output info about active input/sink.
+    shell.echo(util.format('%s - %s - playing on %s', defInput[4], defInput[3], curSink[3]))
 
-// Prompt for new sink number
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: "ENTER DEVICE #: ",
-    terminal: true
-});
-rl.prompt();
+    // List/number the non-active sinks
+    sinkArr.forEach((i, index) => { if (i[1] != curSink[1]) shell.echo(util.format('%s - %s', index, i[3])) })
 
-// Get input
-rl.on('line', function (cmd) {
-    // Validate input
-    if (sinkArr.map((i,index) => index).includes(parseInt(cmd))) {
-        // Have pactl make the switch and quit
-        shell.exec(util.format('pactl move-sink-input %d %d', inputArr[0][1], sinkArr[cmd][1] ))
-        rl.close();
-    } else {
-        shell.echo("Invalid choice. Try again.")
-    }
-});
+    // Prompt for new sink number
+    var rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        prompt: "ENTER DEVICE #: ",
+        terminal: true
+    });
+    rl.prompt();
+
+    // Get input
+    rl.on('line', function (cmd) {
+        // Validate input
+        if (sinkArr.map((i,index) => index).includes(parseInt(cmd))) {
+            // Have pactl make the switch and quit
+            shell.exec(util.format('pactl move-sink-input %d %d', inputArr[0][1], sinkArr[cmd][1] ))
+            rl.close();
+        } else {
+            shell.echo("Invalid choice. Try again.")
+        }
+    });
+}
