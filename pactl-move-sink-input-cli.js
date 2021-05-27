@@ -10,8 +10,11 @@ const sinksRg = new RegExp(/Sink #(\d*)\s*State: (\w*)\s*[^\n]*\n\sDescription: 
 async function getSinkInputs(){
     return new Promise((resolve, reject) => {
         try {
-            const inputsTxt = shell.exec('pactl list sink-inputs', {silent: true}).stdout
-            resolve(inputsTxt)
+            const exec = shell.exec('pactl list sink-inputs', {silent: true})
+            if (exec.stderr) {
+                reject(exec.stderr)
+            }
+            resolve(exec.stdout)
         } catch(error) {
             reject(error)
         }
@@ -62,8 +65,11 @@ async function getInputChoice(inputArr){
 async function getSinks(){
     return new Promise((resolve, reject) => {
         try {
-            const sinksTxt = shell.exec('pactl list sinks', {silent: true}).stdout
-            resolve(sinksTxt)
+            const exec = shell.exec('pactl list sinks', {silent: true})
+            if (exec.stderr) {
+                reject(exec.stderr)
+            }
+            resolve(exec.stdout)
         } catch(error) {
             reject(error)
         }
