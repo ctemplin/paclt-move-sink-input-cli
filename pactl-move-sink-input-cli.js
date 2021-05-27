@@ -7,7 +7,7 @@ const util = require('util')
 const inputsRg = new RegExp(/Sink Input #(\d+).*Sink: (\d+).*media\.name = "(\w*)"\s*application.name = "(\w*)"/, 'sg')
 const sinksRg = new RegExp(/Sink #(\d*)\s*State: (\w*)\s*[^\n]*\n\sDescription: ([^\n]*)\n/, 'mg')
 
-async function getSinkInputs(){
+async function getInputs(){
     return new Promise((resolve, reject) => {
         try {
             const exec = shell.exec('pactl list sink-inputs', {silent: true})
@@ -118,7 +118,7 @@ async function getSinkChoice(sinkArr, defInput) {
 }
 
 function main() {
-    getSinkInputs()
+    getInputs()
     .then(tokenizeInputs)
     .then(getInputChoice)
     .then(function(inputChoice) {
