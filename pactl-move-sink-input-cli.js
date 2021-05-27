@@ -89,34 +89,46 @@ async function getSinkChoice(sinkArr, defInput) {
         const curSink = sinkArr.find((i) => i[1] == defInput[2])
         // Remove the active sink from the list of target sinks
         sinkArr.splice(sinkArr.indexOf(curSink), 1)
-        // Output info about active input/sink.
-        var promptTxt = util.format('%s - %s - playing on %s\n', defInput[4], defInput[3], curSink[3])
-        // List/number the non-active sinks
-        sinkArr.forEach((i, index) => { promptTxt += util.format('%s - %s\n', index+1, i[3]) })
-        promptTxt += 'Enter # of target to move to >'
-        // Prompt for new sink number
-        var rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-            terminal: true,
-            prompt: promptTxt
-        });
-        var resp
-        rl.on('line', line => {
-            const choiceIndex = parseInt(line) - 1 // NaN - 1 = -1
-            if (sinkArr.map((i,index) => index).includes(choiceIndex)) {
-                sinkChoice = sinkArr[choiceIndex]
-                rl.close()
-            } else {
-                rl.setPrompt(util.format('Invalid choice. Choose from 1 - %d >', sinkArr.length))
-                rl.prompt()
-            }
-        })
-        rl.on('close', _=>{
-            resolve(sinkChoice)
-        })
-        rl.prompt();
+        // if there's only one non-active sync choice, choose it
+        if (sinkArr.length == 1) {
+            const autoMoveMsg = util.format('Moving %s - %s to %s.\nExiting...', defInput[4], defInput[3], sinkArr[0][3])
+            displayMsgAndPause(autoMoveMsg)
+            resolve(sinkArr[0])
+        } else {
+            // Output info about active input/sink.
+            var promptTxt = util.format('%s - %s - playing on %s\n', defInput[4], defInput[3], curSink[3])
+            // List/number the non-active sinks
+            sinkArr.forEach((i, index) => { promptTxt += util.format('%s - %s\n', index+1, i[3]) })
+            promptTxt += 'Enter # of target to move to >'
+            // Prompt for new sink number
+            var rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout,
+                terminal: true,
+                prompt: promptTxt
+            });
+            var resp
+            rl.on('line', line => {
+                const choiceIndex = parseInt(line) - 1 // NaN - 1 = -1
+                if (sinkArr.map((i,index) => index).includes(choiceIndex)) {
+                    sinkChoice = sinkArr[choiceIndex]
+                    rl.close()
+                } else {
+                    rl.setPrompt(util.format('Invalid choice. Choose from 1 - %d >', sinkArr.length))
+                    rl.prompt()
+                }
+            })
+            rl.on('close', _=>{
+                resolve(sinkChoice)
+            })
+            rl.prompt();
+        }
     });
+}
+
+function displayMsgAndPause(msg){
+    shell.echo(msg);
+    setTimeout(_=>{}, 2000)
 }
 
 function main() {
@@ -131,11 +143,11 @@ function main() {
             then(function(sinkChoice){
                 shell.exec(util.format('pactl move-sink-input %d %d', inputChoice[1], sinkChoice[1] ))
             })
-            .catch(err=>shell.echo(err))
+            .catch(err=>{displayMsgAndPause(err)})
         })
-        .catch(err=>shell.echo(err))
+        .catch(err=>{displayMsgAndPause(err)})
     })
-    .catch(err=>shell.echo(err))
+    .catch(err=>{displayMsgAndPause(err)})
 }
 
 main();
