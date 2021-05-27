@@ -87,11 +87,12 @@ async function getSinkChoice(sinkArr, defInput) {
     return new Promise((resolve, reject) => {
         // Find the sink for the chosen input
         const curSink = sinkArr.find((i) => i[1] == defInput[2])
-
+        // Remove the active sink from the list of target sinks
+        sinkArr.splice(sinkArr.indexOf(curSink), 1)
         // Output info about active input/sink.
         var promptTxt = util.format('%s - %s - playing on %s\n', defInput[4], defInput[3], curSink[3])
         // List/number the non-active sinks
-        sinkArr.forEach((i, index) => { if (i[1] != curSink[1]) promptTxt += util.format('%s - %s\n', index, i[3]) })
+        sinkArr.forEach((i, index) => { promptTxt += util.format('%s - %s\n', index+1, i[3]) })
         promptTxt += 'Enter # of target to move to>'
         // Prompt for new sink number
         var rl = readline.createInterface({
@@ -102,8 +103,9 @@ async function getSinkChoice(sinkArr, defInput) {
         });
         var resp
         rl.on('line', line => {
-            if (sinkArr.map((i,index) => index).includes(parseInt(line))) {
-                sinkChoice = sinkArr[parseInt(line)]
+            const choiceIndex = parseInt(line) - 1 // NaN - 1 = -1
+            if (sinkArr.map((i,index) => index).includes(choiceIndex)) {
+                sinkChoice = sinkArr[choiceIndex]
                 rl.close()
             } else {
                 rl.setPrompt('\nInvalid choice. Try again. >')
