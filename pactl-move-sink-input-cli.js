@@ -93,7 +93,7 @@ async function getSinkChoice(sinkArr, defInput) {
         var promptTxt = util.format('%s - %s - playing on %s\n', defInput[4], defInput[3], curSink[3])
         // List/number the non-active sinks
         sinkArr.forEach((i, index) => { promptTxt += util.format('%s - %s\n', index+1, i[3]) })
-        promptTxt += 'Enter # of target to move to>'
+        promptTxt += 'Enter # of target to move to >'
         // Prompt for new sink number
         var rl = readline.createInterface({
             input: process.stdin,
@@ -108,7 +108,7 @@ async function getSinkChoice(sinkArr, defInput) {
                 sinkChoice = sinkArr[choiceIndex]
                 rl.close()
             } else {
-                rl.setPrompt('\nInvalid choice. Try again. >')
+                rl.setPrompt(util.format('Invalid choice. Choose from 1 - %d >', sinkArr.length))
                 rl.prompt()
             }
         })
