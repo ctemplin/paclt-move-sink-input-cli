@@ -13,6 +13,7 @@
   "author": "Chris Templin <ctemplin@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "pactl-lists-json": "github:ctemplin/pactl-lists-json",
     "shelljs": "^0.8.4"
   }
 }
