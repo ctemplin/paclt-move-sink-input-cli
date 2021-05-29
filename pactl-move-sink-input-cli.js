@@ -20,7 +20,7 @@ async function getInputChoice(inputArr){
             })
             var inputChoice
             var inputList = 'Multiple inputs found\n'
-            inputArr.map((i, index)=>inputList += util.format('%d: %s - %s\n', index, i['appliction.name'], i['media.name']))*
+            inputArr.map((i, index)=>inputList += util.format('%d: %s - %s\n', index, i['application.name'], i['media.name']))*
             rl.setPrompt(inputList + 'Enter # of input to be moved>')
             rl.on('line', line => {
                 if (inputArr.map((i,index) => index).includes(parseInt(line))) {
