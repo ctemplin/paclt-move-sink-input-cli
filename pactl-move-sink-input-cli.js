@@ -4,7 +4,6 @@ const readline = require('readline');
 const util = require('util')
 const {getInputs, getSinks} = require('pactl-lists-json')
 
-const sinksRg = new RegExp(/Sink #(\d*)\s*State: (\w*)\s*[^\n]*\n\sDescription: ([^\n]*)\n/, 'mg')
 
 async function getInputChoice(inputArr){
     return new Promise((resolve, reject) => {
