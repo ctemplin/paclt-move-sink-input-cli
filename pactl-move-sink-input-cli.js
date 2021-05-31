@@ -4,8 +4,17 @@ const readline = require('readline');
 const util = require('util')
 const {getInputs, getSinks} = require('pactl-lists-json')
 
+let excludedSinkIds = []
+let excludeCorkedInputs = false
+process.argv.map((a, index) => { 
+    if (a=='-x') excludedSinkIds.push(parseInt(process.argv[index+1]))
+    if (a=='--excludeCorkedInputs') excludeCorkedInputs = true 
+})
 
 async function getInputChoice(inputArr){
+    if (excludeCorkedInputs) {
+        inputArr = inputArr.filter((i) => i.Corked != 'yes')
+    }
     return new Promise((resolve, reject) => {
         if (inputArr.length == 0){
             reject("No active input found in PulseAudio. Nothing to do.\nExiting...")
@@ -44,7 +53,12 @@ async function getSinkChoice(sinkArr, defInput) {
         const curSink = sinkArr.find((i) => i.Sink == defInput.Sink)
         // Remove the active sink from the list of target sinks
         sinkArr.splice(sinkArr.indexOf(curSink), 1)
-        // if there's only one non-active sync choice, choose it
+        // Remove sinks excluded per command line arg(s)
+        excludedSinkIds.forEach(exSinkArg => {
+            exSinkIndex = sinkArr.findIndex(sink => sink.Sink == exSinkArg)
+            if (exSinkIndex != -1) {sinkArr.splice(exSinkIndex, 1)}
+        })
+        // if there's only one non-active sync choice left, choose it
         if (sinkArr.length == 1) {
             const autoMoveMsg = util.format('Moving %s - %s to %s.\nExiting...', defInput['application.name'], defInput['media.name'], sinkArr[0].Description)
             displayMsgAndPause(autoMoveMsg)
